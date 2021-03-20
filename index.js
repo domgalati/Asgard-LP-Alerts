@@ -58,7 +58,7 @@ var prefix = "!";
 						.setImage(runethumb)
 						.setTitle('rune.'+quoteccy[i]+' pool alert!')
 						.setAuthor('Asgard LP Update')
-						.setDescription(quoteccy[i].toString().toUpperCase()+' is outperforming RUNE by '+difference+"%!")
+						.setDescription(quoteccy[i].toString().toUpperCase()+' is outperforming RUNE by '+total+"%!")
 						.addField("INFO",quoteccy[i].toString().toUpperCase()+' is up by '+quotepercent+'%!')
 						.setTimestamp();
 					message.channel.send(output)
@@ -69,7 +69,7 @@ var prefix = "!";
 						.setImage(runethumb)
 						.setTitle('rune.'+quoteccy[i]+' pool alert!')
 						.setAuthor('Asgard LP Update')
-						.setDescription('RUNE is outperforming '+quoteccy[i].toString().toUpperCase()+' by '+total+"%!")
+						.setDescription('RUNE is outperforming '+quoteccy[i].toString().toUpperCase()+' by '+difference+"%!")
 						.addField("INFO",'RUNE is up by '+runepercent+'%!')
 						.setTimestamp();
 					message.channel.send(output)
