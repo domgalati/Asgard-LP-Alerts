@@ -1,0 +1,22 @@
+{
+  "name": "THORCHAIN LP Alerter",
+  "version": "1.0.0",
+  "description": "A Bot for alerting Rune market makers about advantageous staking opportunities.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "rune",
+    "thorchain",
+    "bot",
+    "discord",
+    "crypto"
+  ],
+  "author": "andihow",
+  "license": "ISC",
+  "dependencies": {
+    "coingecko-api": "^1.0.10",
+    "discord.js": "^12.5.1"
+  }
+}
