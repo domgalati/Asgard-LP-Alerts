@@ -50,27 +50,27 @@ var prefix = "!";
 			let runepercent = await fetchRuneData();
 			for (i=0; i < quoteccy.length; i++) {
 				let quotepercent = await fetchCoinData(quoteccy[i]);
-				let total = quotepercent + runepercent
+				let total = runepercent - quotepercent
 				let difference = quotepercent - runepercent
-				if (total >= 3) {				
+				if (runepercent > quotepercent && total >= 3) {				
 					output = new Discord.MessageEmbed()
 						.setThumbnail(cointhumb)
 						.setImage(runethumb)
 						.setTitle('rune.'+quoteccy[i]+' pool alert!')
 						.setAuthor('Asgard LP Update')
-						.setDescription(quoteccy[i].toString().toUpperCase()+' is outperforming RUNE by '+total+"%!")
-						.addField("INFO",quoteccy[i].toString().toUpperCase()+' is up by '+quotepercent+'%!')
+						.setDescription('RUNE is outperforming '+quoteccy[i].toString().toUpperCase()+' by '+total+"%!")
+						.addField("INFO",'RUNE is up by '+runepercent+'%!')
 						.setTimestamp();
 					message.channel.send(output)
 				}
-				else if (total <= -3) {			
+				else if (runepercent < quotepercent && total <= -3) {			
 					output = new Discord.MessageEmbed()
 						.setThumbnail(cointhumb)
 						.setImage(runethumb)
 						.setTitle('rune.'+quoteccy[i]+' pool alert!')
 						.setAuthor('Asgard LP Update')
-						.setDescription('RUNE is outperforming '+quoteccy[i].toString().toUpperCase()+' by '+difference+"%!")
-						.addField("INFO",'RUNE is up by '+runepercent+'%!')
+						.setDescription(quoteccy[i].toString().toUpperCase()+' is overperforming RUNE by '+difference+"%!")
+						.addField("INFO",quoteccy[i].toString().toUpperCase()+' is up by '+quotepercent+'%!')
 						.setTimestamp();
 					message.channel.send(output)
 				}
