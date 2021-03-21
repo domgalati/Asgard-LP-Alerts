@@ -3,12 +3,6 @@ const CoinGecko = require('coingecko-api');
 const DiscordClient  = new Discord.Client();
 const CoinGeckoClient = new CoinGecko();
 
-/*Login to discord client*/
-DiscordClient.login("ODIxOTU0NjEwODMwMTE0ODI5.YFLO4g.ZvgeF-SfTXbqagopNRbYkJ7xWFM");
-DiscordClient.once('ready', () => {
-	console.log('Bot Logged Into Discord Channel');
-});
-
 /*Ping CoinGecko API*/
 var ping = async() => {
 	let ping = await CoinGeckoClient.ping();
@@ -29,14 +23,34 @@ var fetchRuneData = async () => {
 
 /*Fetch ccy coin price increase percentage and thumbnail*/
 var fetchCoinData = async(cointocheck) => { 
-	let data = await CoinGeckoClient.coins.fetch(cointocheck, {tickers: false, community_data: false, developer_data: false, localization: false});
+	var coinDataRequest = async() => {
+		const attempts = 5; const delay = 2000;
+		for (let x = 0; x < attempts; x++) {
+			try {
+				return await CoinGeckoClient.coins.fetch(cointocheck, {tickers: false, community_data: false, developer_data: false, localization: false});
+			}
+			catch (e) {
+				await new Promise(r => setTimeout(r, attempts));
+			}
+		}
+	}
+	data = await coinDataRequest()
 	coindata = data.data.market_data.price_change_percentage_24h;
 	cointhumb = data.data.image.thumb
 	return coindata;
 }
 
+/*Discord Functions*/
+
+/*Login to discord client*/
+DiscordClient.login("ODIxOTU0NjEwODMwMTE0ODI5.YFLO4g.ZvgeF-SfTXbqagopNRbYkJ7xWFM");
+DiscordClient.once('ready', () => {
+	console.log('Bot Logged Into Discord Channel');
+});
+var timer
 DiscordClient.on('message', async (message) => {
-var prefix = "!";
+	var prefix = "!";
+	
 	if (message.content.startsWith (prefix + "getPercentageChange")) {
 		let userinput = message.content
 		let usercoin = userinput.substring(21, 100)
@@ -45,38 +59,65 @@ var prefix = "!";
 		message.channel.send(coindata)
 	}
 
-	if (message.content.startsWith (prefix + "fire")) {
+	if (message.content.startsWith (prefix + "start")){
+		mostrecentquotepercent = {}
 		var getPercentSpreads = async() => {
 			let runepercent = await fetchRuneData();
 			for (i=0; i < quoteccy.length; i++) {
 				let quotepercent = await fetchCoinData(quoteccy[i]);
 				let total = runepercent - quotepercent
 				let difference = quotepercent - runepercent
-				if (runepercent > quotepercent && total >= 3) {				
+				if (runepercent > quotepercent && total >= 1) {				
 					output = new Discord.MessageEmbed()
 						.setThumbnail(cointhumb)
 						.setImage(runethumb)
 						.setTitle('rune.'+quoteccy[i]+' pool alert!')
 						.setAuthor('Asgard LP Update')
 						.setDescription('RUNE is outperforming '+quoteccy[i].toString().toUpperCase()+' by '+total+"%!")
-						.addField("INFO",'RUNE is up by '+runepercent+'%!')
+						.addField("INFO",'RUNE has changed by '+runepercent+'%!', false)
 						.setTimestamp();
-					message.channel.send(output)
+					output.coinid = quoteccy[i]
 				}
-				else if (runepercent < quotepercent && total <= -3) {			
+				else if (runepercent < quotepercent && total <= -1) {			
 					output = new Discord.MessageEmbed()
 						.setThumbnail(cointhumb)
 						.setImage(runethumb)
 						.setTitle('rune.'+quoteccy[i]+' pool alert!')
 						.setAuthor('Asgard LP Update')
-						.setDescription(quoteccy[i].toString().toUpperCase()+' is overperforming RUNE by '+difference+"%!")
-						.addField("INFO",quoteccy[i].toString().toUpperCase()+' is up by '+quotepercent+'%!')
+						.setDescription(quoteccy[i].toString().toUpperCase()+' is outperforming RUNE by '+difference+"%!")
+						.addField("INFO",quoteccy[i].toString().toUpperCase()+' has changed by '+quotepercent+'%!')
 						.setTimestamp();
-					message.channel.send(output)
+					output.coinid = quoteccy[i]
+				}
+				else {
+					output = false
+				}
+				if (output !== false) {
+					if (mostrecentquotepercent[quoteccy[i]] == quotepercent){
+						console.log("Supressing duplicate message for " + quoteccy[i])
+					}
+					else {
+						console.log(output)
+						message.channel.send(output);
+						mostrecentquotepercent[quoteccy[i]] = quotepercent
+					}		 
 				}
 			}
 		}
-		getPercentSpreads()
-		console.log("done.")
+		timer = setInterval(function(){
+			getPercentSpreads()
+			console.log("Checking Prices...")
+		}, 10000)
 	}
+
+	if (message.content.startsWith (prefix + "stop")) {
+		message.channel.send("Stopping alerts...")
+		clearInterval(timer)
+	}
+	/*You can trigger the alerts on command by sending !fire while in the same room as the bot.*/
+	// if (message.content.startsWith (prefix + "fire")) {
+	// 	getPercentSpreads()
+	// 	console.log("done.")
+	// }
+
 });
