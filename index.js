@@ -93,8 +93,9 @@ DiscordClient.on('message', async (message) => {
 					output = false
 				}
 				if (output !== false) {
-					if (mostrecentquotepercent[quoteccy[i]] == quotepercent){
-						console.log("Supressing duplicate message for " + quoteccy[i])
+					if (mostrecentquotepercent[quoteccy[i]] == quotepercent || mostrecentquotepercent[quoteccy[i]] - quotepercent < 1){
+						console.log("Supressing duplicate message for: " + quoteccy[i])
+						console.log(output)
 					}
 					else {
 						console.log(output)
@@ -114,10 +115,4 @@ DiscordClient.on('message', async (message) => {
 		message.channel.send("Stopping alerts...")
 		clearInterval(timer)
 	}
-	/*You can trigger the alerts on command by sending !fire while in the same room as the bot.*/
-	// if (message.content.startsWith (prefix + "fire")) {
-	// 	getPercentSpreads()
-	// 	console.log("done.")
-	// }
-
 });
