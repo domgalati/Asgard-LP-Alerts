@@ -25,7 +25,7 @@ var fetchRuneData = async () => {
 	runedata = data.data.market_data.price_change_percentage_24h;
 	runethumb = data.data.image.thumb
 	runeprice = data.data.market_data.current_price.usd
-	DiscordClient.user.setActivity('RUNE @ $'+runeprice.toString(), { type: 'WATCHING' });
+	DiscordClient.user.setActivity('RUNE @ $'+runeprice.toString(), { type: 'WATCHING' }); //This line sets the status to watch the price of RUNE
 	return runedata;
 }
 
@@ -70,7 +70,7 @@ DiscordClient.on('message', async (message) => {
 		message.channel.send(coindata)
 	}
 
-	if (message.content.startsWith (prefix + "start")){
+	if (message.content.startsWith (prefix + "start")){ //starts the watching and alerting system
 		if (status == false){
 			console.log(Date() + " start command issued")
 			message.channel.send(":yellow_circle: Starting engines...")
@@ -122,7 +122,7 @@ DiscordClient.on('message', async (message) => {
 				}
 			}
 
-			timer = setInterval(function(){
+			timer = setInterval(function(){ //loops the function that gets the data and sends the alerts
 				getPercentSpreads()
 				console.log("Checking Prices...")
 			}, 10000)
@@ -152,4 +152,4 @@ DiscordClient.on('message', async (message) => {
 			message.channel.send(":green_circle: I am currently monitoring the market for price changes :mag: - use !stop to shut me off")
 		}
 	}
-});
+});//by andihow 2021
