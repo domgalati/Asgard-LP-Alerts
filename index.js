@@ -24,8 +24,10 @@ var fetchRuneData = async () => {
 	let data = await CoinGeckoClient.coins.fetch('thorchain', {tickers: false, community_data: false, developer_data: false, localization: false});
 	runedata = data.data.market_data.price_change_percentage_24h;
 	runethumb = data.data.image.thumb
+	runeprice = data.data.market_data.current_price.usd
+	DiscordClient.user.setActivity('RUNE @ $'+runeprice.toString(), { type: 'WATCHING' });
 	return runedata;
-};
+}
 
 /*Fetch ccy coin price increase percentage and thumbnail*/
 var fetchCoinData = async(cointocheck) => { 
@@ -47,21 +49,23 @@ var fetchCoinData = async(cointocheck) => {
 }
 
 /*Discord Functions*/
-
 /*Login to discord client*/
 DiscordClient.login("ODIxOTU0NjEwODMwMTE0ODI5.YFLO4g.ZvgeF-SfTXbqagopNRbYkJ7xWFM");
 DiscordClient.once('ready', () => {
 	console.log('Bot Logged Into Discord Channel');
 	status = false
 });
+
+/*set timer for looping pricechecks*/
 var timer
+
 DiscordClient.on('message', async (message) => {
 	var prefix = "!";
 	
 	if (message.content.startsWith (prefix + "getPercentageChange")) {
 		let userinput = message.content
 		let usercoin = userinput.substring(21, 100)
-		console.log(usercoin)
+		console.log("got percentage change of "+usercoin)
 		let result = await fetchCoinData(usercoin);
 		message.channel.send(coindata)
 	}
@@ -70,8 +74,7 @@ DiscordClient.on('message', async (message) => {
 		if (status == false){
 			console.log(Date() + " start command issued")
 			message.channel.send(":yellow_circle: Starting engines...")
-			message.channel.send(":green_circle: I am currently monitoring the market for price changes :mag: - use !stop to shut me off")
-
+			message.channel.send(":green_circle: I am currently monitoring the market for price changes :mag: - use !stop to shut down. Alerts will begin in 10 seconds.")
 			mostrecentquotepercent = {}
 			var getPercentSpreads = async() => {
 				let runepercent = await fetchRuneData();
@@ -79,7 +82,7 @@ DiscordClient.on('message', async (message) => {
 					let quotepercent = await fetchCoinData(quoteccy[i]["geckid"]);
 					let total = runepercent - quotepercent
 					let difference = quotepercent - runepercent
-					if (runepercent > quotepercent && total >= 1) {				
+					if (runepercent > quotepercent && total >= 5) {				
 						output = new Discord.MessageEmbed()
 							.setThumbnail(cointhumb)
 							.setImage(runethumb)
@@ -88,9 +91,9 @@ DiscordClient.on('message', async (message) => {
 							.setDescription('RUNE is outperforming '+quoteccy[i]["geckid"].toString().toUpperCase()+' by '+total.toString().substring(0,5)+"%")
 							.addField(":notebook_with_decorative_cover: More Info",'RUNE has changed by '+runepercent.toString().substring(0,5)+'%'+'\n'+quoteccy[i]["geckid"].toString().toUpperCase()+' has changed by '+quotepercent.toString().substring(0,5)+'%')
 							.setTimestamp();
-						output.coinid = quoteccy[i]
+						output.coinid = quoteccy[i]["geckid"]
 					}
-					else if (runepercent < quotepercent && total <= -1) {			
+					else if (runepercent < quotepercent && total <= -5) {			
 						output = new Discord.MessageEmbed()
 							.setThumbnail(cointhumb)
 							.setImage(runethumb)
@@ -104,8 +107,9 @@ DiscordClient.on('message', async (message) => {
 					else {
 						output = false
 					}
+
 					if (output !== false) {
-						if (mostrecentquotepercent[quoteccy[i]["geckid"]] == quotepercent || mostrecentquotepercent[quoteccy[i]["geckid"]] - quotepercent < 1){
+						if (mostrecentquotepercent[quoteccy[i]["geckid"]] == quotepercent || mostrecentquotepercent[quoteccy[i]["geckid"]] - quotepercent < 5){
 							console.log("Supressing duplicate message for: " + quoteccy[i]["geckid"])
 							console.log(output)
 						}
@@ -130,22 +134,22 @@ DiscordClient.on('message', async (message) => {
 	}
 
 	if (message.content.startsWith (prefix + "stop")) {
-		if (status == false){
+		if (status == true){
 			message.channel.send(":red_circle: Bringing alert system down ...")
 			clearInterval(timer)
 			mostrecentquotepercent = {}
 			status = false
 		} else {
-			message.channel.send(":red_circle: It isnt running...")
+			message.channel.send(":red_circle: I am not sending alerts right now. Use !start to enable the alerting system!")
 		}
 	}
 
 	if (message.content.startsWith (prefix + "status") || message.content.startsWith (prefix + "help")) {
 		if (status == false) {
-			message.channel.send("I am not sending alerts right now. Use !start to turn me on!")
+			message.channel.send(":red_circle: I am not sending alerts right now. Use !start to enable the alerting system!")
 		}
 		if (status == true) {
-			message.channel.send("I am currently monitoring the market for price changes :mag: - use !stop to shut me off")
+			message.channel.send(":green_circle: I am currently monitoring the market for price changes :mag: - use !stop to shut me off")
 		}
 	}
 });
