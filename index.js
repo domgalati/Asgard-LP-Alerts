@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const CoinGecko = require('coingecko-api');
 const DiscordClient  = new Discord.Client();
 const CoinGeckoClient = new CoinGecko();
+const token = require('./token.js').token;
 
 /*Ping CoinGecko API*/
 var ping = async() => {
@@ -25,7 +26,7 @@ var fetchRuneData = async () => {
 	runedata = data.data.market_data.price_change_percentage_24h;
 	runethumb = data.data.image.thumb
 	runeprice = data.data.market_data.current_price.usd
-	DiscordClient.user.setActivity('RUNE @ $'+runeprice.toString(), { type: 'WATCHING' }); //This line sets the status to watch the price of RUNE
+	DiscordClient.user.setActivity('RUNE @ $'+runeprice.toString(), { type: 'WATCHING' });
 	return runedata;
 }
 
@@ -50,7 +51,7 @@ var fetchCoinData = async(cointocheck) => {
 
 /*Discord Functions*/
 /*Login to discord client*/
-DiscordClient.login("ODIxOTU0NjEwODMwMTE0ODI5.YFLO4g.ZvgeF-SfTXbqagopNRbYkJ7xWFM");
+DiscordClient.login(token);
 DiscordClient.once('ready', () => {
 	console.log('Bot Logged Into Discord Channel');
 	status = false
@@ -70,7 +71,7 @@ DiscordClient.on('message', async (message) => {
 		message.channel.send(coindata)
 	}
 
-	if (message.content.startsWith (prefix + "start")){ //starts the watching and alerting system
+	if (message.content.startsWith (prefix + "start")){
 		if (status == false){
 			console.log(Date() + " start command issued")
 			message.channel.send(":yellow_circle: Starting engines...")
@@ -109,8 +110,10 @@ DiscordClient.on('message', async (message) => {
 					}
 
 					if (output !== false) {
-						if (mostrecentquotepercent[quoteccy[i]["geckid"]] == quotepercent || mostrecentquotepercent[quoteccy[i]["geckid"]] - quotepercent < 5){
+						if (mostrecentquotepercent[quoteccy[i]["geckid"]] == quotepercent || mostrecentquotepercent[quoteccy[i]["geckid"]] - quotepercent < 5 || mostrecentquotepercent[quoteccy[i]["geckid"]] - quotepercent > -5){
 							console.log("Supressing duplicate message for: " + quoteccy[i]["geckid"])
+							console.log("Its last recorded percent change was: " + mostrecentquotepercent[quoteccy[i]["geckid"]])
+							console.log("Its current percent change is " + quotepercent.toString().substring(0,5))
 							console.log(output)
 						}
 						else {
@@ -122,7 +125,7 @@ DiscordClient.on('message', async (message) => {
 				}
 			}
 
-			timer = setInterval(function(){ //loops the function that gets the data and sends the alerts
+			timer = setInterval(function(){
 				getPercentSpreads()
 				console.log("Checking Prices...")
 			}, 10000)
@@ -152,4 +155,4 @@ DiscordClient.on('message', async (message) => {
 			message.channel.send(":green_circle: I am currently monitoring the market for price changes :mag: - use !stop to shut me off")
 		}
 	}
-});//by andihow 2021
+});
