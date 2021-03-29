@@ -22,7 +22,19 @@ var quoteccy = [{"geckid":"bitcoin-cash","shorthand":"bch"},
 
 /*Fetch rune price increase percentage and thumnail icon*/
 var fetchRuneData = async () => {
-	let data = await CoinGeckoClient.coins.fetch('thorchain', {tickers: false, community_data: false, developer_data: false, localization: false});
+	var runeDataRequest = async() => {
+		const attempts = 5; const delay = 2000;
+		for (let x = 0; x < attempts; x++) {
+			try {
+				return await CoinGeckoClient.coins.fetch('thorchain', {tickers: false, community_data: false, developer_data: false, localization: false});
+			}
+			catch (e) {
+				console.log("ERR failed fetchRuneData! Trying again. Attempt: " + x)
+				await new Promise(r => setTimeout(r, attempts));
+			}
+		}
+	}
+	data = await runeDataRequest()
 	runedata = data.data.market_data.price_change_percentage_24h;
 	runethumb = data.data.image.thumb
 	runeprice = data.data.market_data.current_price.usd
@@ -39,6 +51,7 @@ var fetchCoinData = async(cointocheck) => {
 				return await CoinGeckoClient.coins.fetch(cointocheck, {tickers: false, community_data: false, developer_data: false, localization: false});
 			}
 			catch (e) {
+				console.log("ERR failed fetchCoinData! Trying again. Attempt: " + x)
 				await new Promise(r => setTimeout(r, attempts));
 			}
 		}
@@ -51,6 +64,7 @@ var fetchCoinData = async(cointocheck) => {
 
 /*Discord Functions*/
 /*Login to discord client*/
+/* NOTE THAT THIS IS THE TOKEN FOR THE DEVELOPMENT BOT!!!*/
 DiscordClient.login(token);
 DiscordClient.once('ready', () => {
 	console.log('Bot Logged Into Discord Channel');
