@@ -64,7 +64,6 @@ var fetchCoinData = async(cointocheck) => {
 
 /*Discord Functions*/
 /*Login to discord client*/
-/* NOTE THAT THIS IS THE TOKEN FOR THE DEVELOPMENT BOT!!!*/
 DiscordClient.login(token);
 DiscordClient.once('ready', () => {
 	console.log('Bot Logged Into Discord Channel');
@@ -124,16 +123,16 @@ DiscordClient.on('message', async (message) => {
 					}
 
 					if (output !== false) {
-						if (mostrecentquotepercent[quoteccy[i]["geckid"]] == quotepercent || mostrecentquotepercent[quoteccy[i]["geckid"]] - quotepercent < 5 || mostrecentquotepercent[quoteccy[i]["geckid"]] - quotepercent > -5){
+						if ( mostrecentquotepercent[quoteccy[i]["geckid"]] === undefined || mostrecentquotepercent[quoteccy[i]["geckid"]] - quotepercent > 5 || mostrecentquotepercent[quoteccy[i]["geckid"]] - quotepercent < -5){
+							console.log(output)
+							message.channel.send(output);
+							mostrecentquotepercent[quoteccy[i]["geckid"]] = quotepercent
+						}
+						else {
 							console.log("Supressing duplicate message for: " + quoteccy[i]["geckid"])
 							console.log("Its last recorded percent change was: " + mostrecentquotepercent[quoteccy[i]["geckid"]])
 							console.log("Its current percent change is " + quotepercent.toString().substring(0,5))
 							console.log(output)
-						}
-						else {
-							console.log(output)
-							message.channel.send(output);
-							mostrecentquotepercent[quoteccy[i]["geckid"]] = quotepercent
 						}		 
 					}
 				}
