@@ -141,7 +141,7 @@ DiscordClient.on('message', async (message) => {
 			timer = setInterval(function(){
 				getPercentSpreads()
 				console.log("Checking Prices...")
-			}, 900000)
+			}, 200000)
 			status = true
 		}
 		else {
