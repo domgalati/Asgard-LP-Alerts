@@ -1,9 +1,9 @@
-#Asgard-LP-Alert Chat Bot==
+# Asgard-LP-Alert Chat Bot
 
-##PREREQ:
+## PREREQ:
 * have node installed
 
-##INSTALLING:
+## INSTALLING:
 * clone the repo
 * install package dependencies
 ** coingecko-api
